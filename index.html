@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Tower of Hanoi Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="controls">
+            <label>Number of Disks：<input type="number" id="diskCount" min="3" max="8" value="5"></label>
+            <span>Step Count：<span id="moveCount">0</span></span>
+            <button id="resetBtn">Reset Game</button>
+            <button id="autoBtn">Automatic Demonstration</button>
+        </div>
+
+        <div class="game-board">
+            <div class="peg" data-idx="0"></div>
+            <div class="peg" data-idx="1"></div>
+            <div class="peg" data-idx="2"></div>
+        </div>
+
+        <div id="tip" class="tip"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
