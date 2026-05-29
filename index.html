@@ -12,7 +12,7 @@
         }
 
         body {
-            background-color: #e6f7ff; 
+            background-color: #e6f7ff;
             padding: 30px;
             text-align: center;
         }
@@ -61,41 +61,39 @@
             display: flex;
             justify-content: space-evenly;
             align-items: flex-end;
-            height: 450px;
+            height: 400px;
             max-width: 900px;
             margin: 0 auto;
-        }
-
-        .tower {
-            width: 220px;
-            height: 380px;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: center;
             position: relative;
         }
 
-        .tower::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            width: 10px;
-            height: 330px;
-            background-color: #636e72;
-            border-radius: 5px;
-            z-index: 1;
-        }
-
+        .tower {
+            width: 200px;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+    
         .tower-base {
             position: absolute;
-            bottom: -10px;
+            bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 200px;
-            height: 12px;
+            width: 240px;
+            height: 16px;
             background-color: #636e72;
             border-radius: 4px;
-            z-index: 0;
+            z-index: 1;
+        }
+        .tower-pole {
+            position: absolute;
+            bottom: 16px;
+            width: 10px;
+            height: 300px;
+            background-color: #636e72;
+            border-radius: 5px;
+            z-index: 2;
         }
 
         .disk {
@@ -105,7 +103,7 @@
             transition: 0.15s;
             cursor: grab;
             position: relative;
-            z-index: 2; 
+            z-index: 3; 
         }
 
         .disk:active {
@@ -140,12 +138,15 @@
     <div class="game-container">
         <div class="tower" id="tower1">
             <div class="tower-base"></div>
+            <div class="tower-pole"></div>
         </div>
         <div class="tower" id="tower2">
             <div class="tower-base"></div>
+            <div class="tower-pole"></div>
         </div>
         <div class="tower" id="tower3">
             <div class="tower-base"></div>
+            <div class="tower-pole"></div>
         </div>
     </div>
 
@@ -172,8 +173,10 @@
 
             towers.forEach(t => {
                 const base = t.querySelector('.tower-base');
+                const pole = t.querySelector('.tower-pole');
                 t.innerHTML = '';
                 t.appendChild(base);
+                t.appendChild(pole);
             });
 
             for (let i = num; i >= 1; i--) {
@@ -216,7 +219,8 @@
             if (!currentDragDisk) return;
 
             const targetTower = this;
-            const topDisk = targetTower.lastElementChild;
+            const disks = Array.from(targetTower.children).filter(el => el.classList.contains('disk'));
+            const topDisk = disks.length > 0 ? disks[disks.length - 1] : null;
             const msg = document.getElementById("message");
 
             if (topDisk) {
@@ -235,7 +239,8 @@
 
         function checkWin() {
             const total = parseInt(document.getElementById("diskCount").value);
-            if (towers[2].children.length === total) {
+            const disksInTower3 = Array.from(towers[2].children).filter(el => el.classList.contains('disk'));
+            if (disksInTower3.length === total) {
                 document.getElementById("message").innerText = "Congratulations! You win!";
             }
         }
