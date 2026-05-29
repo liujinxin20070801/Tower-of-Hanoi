@@ -1,27 +1,224 @@
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>3D Tower of Hanoi Game</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower of Hanoi</title>
+    <style>
+        {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #e6f7ff; /* Light blue background */
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2d3436;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .control-panel {
+            margin-bottom: 45px;
+            font-size: 18px;
+            color: #2d3436;
+        }
+
+        #diskCount {
+            width: 100px;
+            height: 38px;
+            padding: 0 10px;
+            font-size: 16px;
+            border: 1px solid #b2bec3;
+            border-radius: 6px;
+            text-align: center;
+            margin: 0 10px;
+            outline: none;
+        }
+
+        button {
+            height: 38px;
+            padding: 0 24px;
+            background-color: #0984e3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background-color: #0667b4;
+        }
+
+        .game-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 450px;
+            gap: 220px; /* Poles are well separated */
+        }
+
+        .tower {
+            width: 220px;
+            height: 380px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Pole (behind disks) */
+        .tower::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 10px;
+            height: 330px;
+            background-color: #636e72;
+            border-radius: 5px;
+            z-index: 1;
+        }
+
+        .disk {
+            height: 30px;
+            margin: 2px 0;
+            border-radius: 6px;
+            transition: 0.15s;
+            cursor: grab;
+            position: relative;
+            z-index: 2; /* Disks cover the pole */
+        }
+
+        .disk:active {
+            cursor: grabbing;
+        }
+
+        #message {
+            margin-top: 25px;
+            font-size: 17px;
+            color: #d63031;
+            height: 22px;
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="controls">
-            <label>Number of Disks：<input type="number" id="diskCount" min="3" max="8" value="5"></label>
-            <span>Step Count：<span id="moveCount">0</span></span>
-            <button id="resetBtn">Reset Game</button>
-            <button id="autoBtn">Automatic Demonstration</button>
-        </div>
 
-        <div class="game-board">
-            <div class="peg" data-idx="0"></div>
-            <div class="peg" data-idx="1"></div>
-            <div class="peg" data-idx="2"></div>
-        </div>
+    <h1>Tower of Hanoi</h1>
 
-        <div id="tip" class="tip"></div>
+    <div class="control-panel">
+        <label>Number of Disks:</label>
+        <select id="diskCount">
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+        </select>
+        <button onclick="initGame()">Start Game</button>
     </div>
 
-    <script src="script.js"></script>
+    <div class="game-container">
+        <div class="tower" id="tower1"></div>
+        <div class="tower" id="tower2"></div>
+        <div class="tower" id="tower3"></div>
+    </div>
+
+    <div id="message"></div>
+
+    <script>
+        let currentDragDisk = null;
+        const colors = [
+            "#e17055", "#fd79a8", "#00b894", "#0984e3",
+            "#6c5ce7", "#fdcb6e", "#e84393", "#2d3436"
+        ];
+
+        const towers = [
+            document.getElementById("tower1"),
+            document.getElementById("tower2"),
+            document.getElementById("tower3")
+        ];
+
+        function initGame() {
+            const msg = document.getElementById("message");
+            msg.innerText = "";
+
+            let num = parseInt(document.getElementById("diskCount").value);
+
+            towers.forEach(t => t.innerHTML = "");
+
+            for (let i = num; i >= 1; i--) {
+                const disk = document.createElement("div");
+                disk.className = "disk";
+                disk.style.width = (i * 22) + "px";
+                disk.style.backgroundColor = colors[i - 1];
+                disk.dataset.size = i;
+                disk.draggable = true;
+
+                disk.addEventListener("dragstart", dragStart);
+                disk.addEventListener("dragend", dragEnd);
+                towers[0].appendChild(disk);
+            }
+        }
+
+        function dragStart(e) {
+            currentDragDisk = this;
+            const parent = currentDragDisk.parentElement;
+            if (currentDragDisk !== parent.lastElementChild) {
+                e.preventDefault();
+                currentDragDisk = null;
+                return;
+            }
+            currentDragDisk.style.opacity = "0.6";
+        }
+
+        function dragEnd() {
+            if (currentDragDisk) currentDragDisk.style.opacity = "1";
+            currentDragDisk = null;
+        }
+
+        towers.forEach(tower => {
+            tower.addEventListener("dragover", e => e.preventDefault());
+            tower.addEventListener("drop", dropDisk);
+        });
+
+        function dropDisk(e) {
+            e.preventDefault();
+            if (!currentDragDisk) return;
+
+            const targetTower = this;
+            const topDisk = targetTower.lastElementChild;
+            const msg = document.getElementById("message");
+
+            if (topDisk) {
+                const dragSize = parseInt(currentDragDisk.dataset.size);
+                const topSize = parseInt(topDisk.dataset.size);
+                if (dragSize >= topSize) {
+                    msg.innerText = "Error: Smaller disk only!";
+                    return;
+                }
+            }
+
+            msg.innerText = "";
+            targetTower.appendChild(currentDragDisk);
+            checkWin();
+        }
+
+        function checkWin() {
+            const total = parseInt(document.getElementById("diskCount").value);
+            if (towers[2].children.length === total) {
+                document.getElementById("message").innerText = "Congratulations! You win!";
+            }
+        }
+
+        window.onload = initGame;
+    </script>
 </body>
 </html>
