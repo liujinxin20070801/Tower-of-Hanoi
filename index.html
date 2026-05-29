@@ -61,39 +61,40 @@
             display: flex;
             justify-content: space-evenly;
             align-items: flex-end;
-            height: 400px;
+            height: 450px;
             max-width: 900px;
             margin: 0 auto;
-            position: relative;
         }
 
         .tower {
-            width: 200px;
-            height: 350px;
+            width: 220px;
+            height: 380px;
             display: flex;
-            flex-direction: column;
+            flex-direction: column-reverse;
             align-items: center;
             position: relative;
-    
-        .tower-base {
+        }
+        .tower::after {
+            content: '';
             position: absolute;
             bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 240px;
-            height: 16px;
-            background-color: #636e72;
-            border-radius: 4px;
-            z-index: 1;
-        }
-        .tower-pole {
-            position: absolute;
-            bottom: 16px;
             width: 10px;
-            height: 300px;
+            height: 330px;
             background-color: #636e72;
             border-radius: 5px;
-            z-index: 2;
+            z-index: 1;
+        }
+
+        .tower-base {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 12px;
+            background-color: #636e72;
+            border-radius: 4px;
+            z-index: 0;
         }
 
         .disk {
@@ -103,15 +104,22 @@
             transition: 0.15s;
             cursor: grab;
             position: relative;
-            z-index: 3; 
+            z-index: 2; 
         }
 
         .disk:active {
             cursor: grabbing;
         }
 
+        #stepCount {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #0984e3;
+        }
+
         #message {
-            margin-top: 25px;
+            margin-top: 10px;
             font-size: 17px;
             color: #d63031;
             height: 22px;
@@ -135,25 +143,24 @@
         <button onclick="initGame()">Start Game</button>
     </div>
 
+    <div id="stepCount">Steps: 0</div>
+    <div id="message"></div>
+
     <div class="game-container">
         <div class="tower" id="tower1">
             <div class="tower-base"></div>
-            <div class="tower-pole"></div>
         </div>
         <div class="tower" id="tower2">
             <div class="tower-base"></div>
-            <div class="tower-pole"></div>
         </div>
         <div class="tower" id="tower3">
             <div class="tower-base"></div>
-            <div class="tower-pole"></div>
         </div>
     </div>
 
-    <div id="message"></div>
-
     <script>
         let currentDragDisk = null;
+        let step = 0; 
         const colors = [
             "#e17055", "#fd79a8", "#00b894", "#0984e3",
             "#6c5ce7", "#fdcb6e", "#e84393", "#2d3436"
@@ -166,6 +173,8 @@
         ];
 
         function initGame() {
+            step = 0; 
+            document.getElementById("stepCount").innerText = "Steps: 0";
             const msg = document.getElementById("message");
             msg.innerText = "";
 
@@ -173,10 +182,8 @@
 
             towers.forEach(t => {
                 const base = t.querySelector('.tower-base');
-                const pole = t.querySelector('.tower-pole');
                 t.innerHTML = '';
                 t.appendChild(base);
-                t.appendChild(pole);
             });
 
             for (let i = num; i >= 1; i--) {
@@ -219,8 +226,7 @@
             if (!currentDragDisk) return;
 
             const targetTower = this;
-            const disks = Array.from(targetTower.children).filter(el => el.classList.contains('disk'));
-            const topDisk = disks.length > 0 ? disks[disks.length - 1] : null;
+            const topDisk = targetTower.lastElementChild;
             const msg = document.getElementById("message");
 
             if (topDisk) {
@@ -234,13 +240,19 @@
 
             msg.innerText = "";
             targetTower.appendChild(currentDragDisk);
+            
+            step++; 
+            document.getElementById("stepCount").innerText = "Steps: " + step; 
+            
             checkWin();
         }
-
         function checkWin() {
-            const total = parseInt(document.getElementById("diskCount").value);
-            const disksInTower3 = Array.from(towers[2].children).filter(el => el.classList.contains('disk'));
-            if (disksInTower3.length === total) {
+            const totalDisks = parseInt(document.getElementById("diskCount").value);
+
+            const allChildren = towers[2].children.length;
+            const realDiskCount = allChildren - 1;
+
+            if (realDiskCount === totalDisks) {
                 document.getElementById("message").innerText = "Congratulations! You win!";
             }
         }
