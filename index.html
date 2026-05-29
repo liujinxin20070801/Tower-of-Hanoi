@@ -12,7 +12,7 @@
         }
 
         body {
-            background-color: #e6f7ff; /* Light blue background */
+            background-color: #e6f7ff; 
             padding: 30px;
             text-align: center;
         }
@@ -59,10 +59,11 @@
 
         .game-container {
             display: flex;
-            justify-content: center;
+            justify-content: space-evenly;
             align-items: flex-end;
             height: 450px;
-            gap: 220px; /* Poles are well separated */
+            max-width: 900px;
+            margin: 0 auto;
         }
 
         .tower {
@@ -74,7 +75,6 @@
             position: relative;
         }
 
-        /* Pole (behind disks) */
         .tower::after {
             content: '';
             position: absolute;
@@ -86,6 +86,18 @@
             z-index: 1;
         }
 
+        .tower-base {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 12px;
+            background-color: #636e72;
+            border-radius: 4px;
+            z-index: 0;
+        }
+
         .disk {
             height: 30px;
             margin: 2px 0;
@@ -93,7 +105,7 @@
             transition: 0.15s;
             cursor: grab;
             position: relative;
-            z-index: 2; /* Disks cover the pole */
+            z-index: 2; 
         }
 
         .disk:active {
@@ -126,9 +138,15 @@
     </div>
 
     <div class="game-container">
-        <div class="tower" id="tower1"></div>
-        <div class="tower" id="tower2"></div>
-        <div class="tower" id="tower3"></div>
+        <div class="tower" id="tower1">
+            <div class="tower-base"></div>
+        </div>
+        <div class="tower" id="tower2">
+            <div class="tower-base"></div>
+        </div>
+        <div class="tower" id="tower3">
+            <div class="tower-base"></div>
+        </div>
     </div>
 
     <div id="message"></div>
@@ -152,7 +170,11 @@
 
             let num = parseInt(document.getElementById("diskCount").value);
 
-            towers.forEach(t => t.innerHTML = "");
+            towers.forEach(t => {
+                const base = t.querySelector('.tower-base');
+                t.innerHTML = '';
+                t.appendChild(base);
+            });
 
             for (let i = num; i >= 1; i--) {
                 const disk = document.createElement("div");
